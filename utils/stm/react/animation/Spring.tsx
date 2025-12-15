@@ -131,7 +131,6 @@ export function Spring({
   const elRef = React.useRef<HTMLDivElement>(null);
   const innerRef = React.useRef<HTMLDivElement>(null);
   const vis = visibility ? useVisibilitySignal<HTMLDivElement>(visibility, elRef) : null;
-  const trig = useRef(new Set(triggers));
 
   const st: Record<string, any> = {};
   for (const key in initConfig) {

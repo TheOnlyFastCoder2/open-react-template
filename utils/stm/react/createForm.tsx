@@ -1,8 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { signal as makeSignal, Signal, untracked, type SignalV } from '..';
+import { useRef } from 'react';
+import { signal as makeSignal, Signal } from '..';
 import { useSignal, useWatch } from './react';
 import { Active } from './Active';
-import { is } from 'valibot';
 
 type OnChange = React.ChangeEvent<HTMLInputElement>;
 type PropsInput = React.DetailedHTMLProps<
@@ -34,8 +33,8 @@ type FieldSignals<V> = {
 class Form<S extends FormShape> {
   private formSignals: { [K in keyof S]: FieldSignals<S[K]> };
   private config: FormConfig<S>;
-  private submitTick = makeSignal(0);
   public isValidForm = makeSignal(false);
+  public isSubmitted = makeSignal<null | boolean>(null);
 
   constructor(config: FormConfig<S>) {
     this.config = config;
@@ -97,7 +96,13 @@ class Form<S extends FormShape> {
               isHide ? { position: 'absolute', pointerEvents: 'none', opacity: 0, ...style } : style
             }
             className={className}
-            ref={ref}
+            ref={(e) => {
+              ref.current = e;
+              const _ref = props.ref;
+              if (_ref && 'current' in (_ref as any)) {
+                (_ref as any).current = e;
+              }
+            }}
             onChange={_onChange}
           />
         );
@@ -173,29 +178,13 @@ class Form<S extends FormShape> {
     return isValid;
   }
 
-  public handleSubmit() {
-    const isValid = this.validateForm();
-    if (isValid) {
-      const formData = (
-        Object.entries(this.formSignals) as [keyof S, FieldSignals<S[keyof S]>][]
-      ).reduce(
-        (acc, [key, sigs]) => {
-          acc[key] = sigs.value.v as S[typeof key];
-          return acc;
-        },
-        {} as { [K in keyof S]: S[K] }
-      );
-
-      console.log('Form submitted', formData);
-    } else {
-      console.log('Form contains errors');
-    }
-  }
-
-
   public async onSubmit(callback: FormData<S>) {
     const isValid = this.validateForm();
+    this.isSubmitted.v = true;
+
     if (!isValid) return;
+    this.isValidForm.v = true;
+
     const formData = (
       Object.entries(this.formSignals) as [keyof S, FieldSignals<S[keyof S]>][]
     ).reduce(
@@ -205,9 +194,17 @@ class Form<S extends FormShape> {
       },
       {} as { [K in keyof S]: S[K] }
     );
-
+    this.isValidForm.v = false;
     await callback(formData);
   }
 }
 
+export function useForm<T extends FormShape>(formConfig:FormConfig<T>) {
+  const formRef = useRef<Form<T> | null>(null);
+  if (!formRef.current) {
+    formRef.current = new Form<T>(formConfig);
+  }
+
+  return formRef.current;
+}
 export default Form;

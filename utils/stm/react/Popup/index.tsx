@@ -1,10 +1,9 @@
 import { useImperativeHandle, useRef, type PropsWithChildren } from 'react';
 import $ from './styles.module.css';
 
-
 import { useSignal } from '../react';
 import { Active } from '../Active';
-
+import { createPortal } from 'react-dom';
 export interface ImpRef {
   toOpen: () => void;
   toClose: (cb?: (isBlock: boolean) => void) => void;
@@ -29,8 +28,8 @@ export default function Popup({
   mode = 'normal',
 }: Props) {
   const refPopup = useRef<HTMLDivElement>(null);
-  const isOpen = useSignal(false)
-  const timeId = useSignal(-1)
+  const isOpen = useSignal(false);
+  const timeId = useSignal(-1);
 
   useImperativeHandle(impRef, () => ({
     toOpen: () => (isOpen.v = true),
@@ -52,20 +51,26 @@ export default function Popup({
     e.currentTarget.setAttribute?.('remove', 'true');
     impRef.current.toClose?.();
   };
+  if (typeof window === 'undefined') return;
+  const overlays = document.getElementById('#root') || document.body;
 
   return (
     <Active sg={isOpen} is={true}>
-      <div
-        onClick={handleClickOverlay}
-        className={`${$.Popup} ${$[mode]} ${className}`}
-        ref={refPopup}
-      >
+      {createPortal(
         <div
-          onClick={(e) => e.stopPropagation()}
-          className={`${$.content} ${classNameContent}`}
-          children={children}
-        />
-      </div>
+          onClick={handleClickOverlay}
+          className={`${$.Popup} ${$[mode]} ${className}`}
+          ref={refPopup}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`${$.content} ${classNameContent}`}
+            children={children}
+          />
+        </div>,
+        overlays
+      )}
     </Active>
   );
 }
+1

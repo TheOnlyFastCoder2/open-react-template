@@ -1,6 +1,6 @@
 'use client';
 import React, { useImperativeHandle, useRef, useEffect } from 'react';
-import { useSignal, useWatch } from './react';
+import { useSignal, useWatch } from '../../_stm/react/react';
 import { Active } from './Active';
 import type { Signal, SignalV } from '..';
 

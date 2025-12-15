@@ -1,16 +1,7 @@
-'use client';
-import React from 'react';
-import { useSignal, type TRSignal } from './react';
-import { Active } from './Active';
-import type { Signal } from '..';
-
-
-
-
-interface SwitchProps<T> {
-  sg: TRSignal<T> | Signal<T>;
-  children: React.ReactNode;
-}
+import type { JSX } from "react";
+import type { Signal } from "..";
+import { useSignal, type TRSignal } from "./react";
+import { Active } from "./Active";
 
 type CaseCondition<T> = T | T[] | ((v: T) => boolean);
 
@@ -19,12 +10,17 @@ interface CaseProps<T> {
   children: React.ReactNode;
 }
 
+interface SwitchProps<T> {
+  sg: TRSignal<T> | Signal<T>;
+  children:
+    | React.ReactElement<CaseProps<T>>
+    | React.ReactElement<CaseProps<T>>[];
+}
 interface DefaultProps {
   children: React.ReactNode;
 }
 
-
-export function Switch<T>({ sg, children }: SwitchProps<T>) {
+function SwitchInner<T>({ sg, children }: SwitchProps<T>) {
   const isDefault = useSignal(false);
   const count = useSignal<[number, number]>([0, 0]);
   const len = React.Children.count(children);
@@ -45,7 +41,7 @@ export function Switch<T>({ sg, children }: SwitchProps<T>) {
   );
 }
 
-Switch.Case = function Case<T>({
+function CaseInner<T>({
   sg,
   is,
   isDefault,
@@ -58,7 +54,7 @@ Switch.Case = function Case<T>({
   count?: ReturnType<typeof useSignal<[number, number]>>;
   len?: number;
 }) {
-  const condition = is as T | T[] | ((v: T) => boolean);
+  const condition = is as CaseCondition<T>;
 
   return (
     <Active
@@ -66,7 +62,7 @@ Switch.Case = function Case<T>({
       is={condition}
       callback={(match) => {
         const [i, matched] = count!.v;
-        count!.v = [((i + 1) % (len ?? 1)), (matched + (match ? 1 : 0))];
+        count!.v = [((i + 1) % (len ?? 1)), matched + (match ? 1 : 0)];
         isDefault!.v = (count!.v as any)[1] === 0;
 
         if (count!.v[0] >= (len ?? 1) - 1) {
@@ -77,16 +73,29 @@ Switch.Case = function Case<T>({
       {children}
     </Active>
   );
-};
+}
 
-
-Switch.Default = function Default<T>({
+function DefaultInner<T>({
   isDefault,
   children,
-}: DefaultProps & { sg?: TRSignal<T>; isDefault?: ReturnType<typeof useSignal<boolean>> }) {
+}: DefaultProps & {
+  sg?: TRSignal<T>;
+  isDefault?: ReturnType<typeof useSignal<boolean>>;
+}) {
   return (
     <Active sg={isDefault!} is={true}>
       {children}
     </Active>
   );
+}
+
+// объединяем в один компонент с дженериками наружу
+type SwitchComponent = {
+  <T>(props: SwitchProps<T>): JSX.Element;
+  Case: <T>(props: CaseProps<T>) => JSX.Element;
+  Default: <T>(props: DefaultProps & { sg?: TRSignal<T>; isDefault?: ReturnType<typeof useSignal<boolean>> }) => JSX.Element;
 };
+
+export const Switch = SwitchInner as SwitchComponent;
+Switch.Case = CaseInner as any;
+Switch.Default = DefaultInner as any;

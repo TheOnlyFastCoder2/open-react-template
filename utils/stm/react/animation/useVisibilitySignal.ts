@@ -5,7 +5,7 @@ import { useSignal } from '../react';
 type Range = [number, number];
 type RangeList = Range[];
 
-function ensureOverlay(enterAt: RangeList, exitAt: RangeList, debug: boolean) {
+export function ensureOverlay(enterAt: RangeList, exitAt: RangeList, debug: boolean) {
   const overlay = document.createElement('div');
   overlay.className = 'debug-overlay';
   overlay.style.cssText = `
@@ -20,7 +20,7 @@ function ensureOverlay(enterAt: RangeList, exitAt: RangeList, debug: boolean) {
     font-family: monospace;
     color: #fff;
     text-shadow: 0 0 3px rgba(0,0,0,0.8);
-    mix-blend-mode: difference;
+    // mix-blend-mode: difference;
     opacity: ${debug ? 1 : 0};
     visibility: ${debug ? 'visible' : 'hidden'};
     transition: opacity 0.3s ease;
@@ -75,7 +75,7 @@ function ensureOverlay(enterAt: RangeList, exitAt: RangeList, debug: boolean) {
   return { overlay, enterLines, exitLines };
 }
 
-export default function useVisibilitySignal<T extends HTMLElement>(
+export default function useVisibilitySignal<T extends HTMLElement = HTMLDivElement>(
   {
     enterAt = [[0, 1]],
     exitAt = [[Infinity, Infinity]],

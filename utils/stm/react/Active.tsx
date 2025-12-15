@@ -1,22 +1,37 @@
 import { useState } from 'react';
-import { useWatch, type TRSignal } from './react';
-import type { SignalV } from '..';
+import { useWatch, type TRComputed, type TRSignal } from './react';
+import type { Signal } from '..';
 
-const isUndefined = Symbol('undefined')
-
+const isUndefined = Symbol('undefined');
+type Sg = TRSignal<any> | Signal<any> | TRComputed<any>;
 interface ActiveProps<T> {
-  sg: TRSignal<any>| SignalV<any>;
-  is?: T | T[] | ((v: T) => boolean) |  typeof isUndefined;
+  sg?: Sg | typeof isUndefined;
+  triggers?: Sg[];
+  is?: T | T[] | ((v: T) => boolean) | typeof isUndefined;
   callback?: (v: boolean) => void;
   children: React.ReactNode | (() => React.ReactNode);
+  ch?: React.ReactNode | (() => React.ReactNode);
 }
 
-export function Active<T>({ sg, is = isUndefined, children, callback }: ActiveProps<T>) {
+function _Active<T>({
+  sg = isUndefined,
+  is = isUndefined,
+  triggers = [],
+  children,
+  ch,
+  callback,
+}: ActiveProps<T>) {
+  const _ch = ch ?? children;
   const [visible, setVisible] = useState(false);
   const isRerender = is === isUndefined;
   useWatch(() => {
+    for (let item of triggers) {
+      item.v;
+    }
+    if (sg === isUndefined) return setVisible(!visible);
     const val = sg.v;
-    if(isRerender) return setVisible(!visible)
+    if (isRerender) return setVisible(!visible);
+
     let result = false;
 
     if (is === undefined) {
@@ -31,11 +46,11 @@ export function Active<T>({ sg, is = isUndefined, children, callback }: ActivePr
 
     callback?.(result);
     setVisible(result);
-  });
-  
-  return !isRerender ? visible ? showChildren(children) : null : showChildren(children);
-}
+  }, [...triggers, is]);
 
-function showChildren(ch:React.ReactNode | (() => React.ReactNode)) { 
+  return !isRerender ? (visible ? showChildren(_ch) : null) : showChildren(_ch);
+}
+export const Active = _Active;
+function showChildren(ch: React.ReactNode | (() => React.ReactNode)) {
   return typeof ch === 'function' ? ch() : ch;
 }
