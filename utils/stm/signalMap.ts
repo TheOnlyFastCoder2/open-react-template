@@ -94,7 +94,6 @@ function ownEnumerableKeys(obj: object): (string | symbol)[] {
 
 /* Дев-заморозка массива, чтобы ловить случайные мутации list.v */
 function freezeDev<A extends ReadonlyArray<unknown>>(arr: A): A {
-  //@ts-expect-error
   if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
     return Object.freeze(arr.slice()) as A;
   }
@@ -368,7 +367,6 @@ export class SignalMap<T> extends Signal<ReadonlyArray<DeepSignal<T>>> {
         const key = getKey(item, i);
 
         if (nextKeys.has(key)) {
-          //@ts-expect-error
           if (typeof process !== 'undefined' && process.env?.NODE_ENV !== 'production') {
             console.warn('[signalMap.effectEach] duplicate key:', key);
           }
