@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 
 import Header from "@/components/ui/header";
 
+
 const inter = Inter({
   subsets: ["latin"],
   variable: "--font-inter",
@@ -61,3 +62,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+
