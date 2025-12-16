@@ -1,0 +1,256 @@
+/* ====== Layout ====== */
+.wf-container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 72rem;            /* max-w-6xl */
+  padding-left: 1rem;          /* px-4 */
+  padding-right: 1rem;
+}
+@media (min-width: 640px) {    /* sm:px-6 */
+  .wf-container { padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+
+.wf-block { padding-bottom: 3rem; }     /* pb-12 */
+@media (min-width: 768px) {             /* md:pb-20 */
+  .wf-block { padding-bottom: 5rem; }
+}
+
+.wf-header {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 48rem;            /* max-w-3xl */
+  padding-bottom: 3rem;        /* pb-12 */
+  text-align: center;          /* text-center */
+}
+@media (min-width: 768px) {             /* md:pb-20 */
+  .wf-header { padding-bottom: 5rem; }
+}
+
+/* ====== Sub-label line + gradient text ====== */
+.wf-sublabel {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;                /* gap-3 */
+  padding-bottom: 0.75rem;     /* pb-3 */
+  position: relative;
+}
+.wf-sublabel::before,
+.wf-sublabel::after {
+  content: "";
+  height: 1px;                 /* h-px */
+  width: 2rem;                 /* w-8 */
+}
+.wf-sublabel::before {
+  background-image: linear-gradient(to right, transparent, rgba(199, 210, 254, 0.5)); /* indigo-200/50 */
+}
+.wf-sublabel::after {
+  background-image: linear-gradient(to left, transparent, rgba(199, 210, 254, 0.5));
+}
+
+.wf-gradientText {
+  display: inline-flex;
+  background-image: linear-gradient(to right, #6366f1, #c7d2fe); /* indigo-500 -> indigo-200 */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ====== Title (animated gradient text) ====== */
+@keyframes wf-gradient {
+  0%   { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+.wf-title {
+  padding-bottom: 1rem; /* pb-4 */
+  font-size: 1.875rem;  /* text-3xl */
+  line-height: 2.25rem;
+  font-weight: 600;     /* font-semibold */
+
+  /* font-nacelle (если у тебя своя переменная/шрифт — подставь) */
+  font-family: var(--font-nacelle, inherit);
+
+  /* bg-[linear-gradient(...)] + bg-clip-text + text-transparent */
+  background-image: linear-gradient(
+    to right,
+    #e5e7eb,  /* gray-200 */
+    #c7d2fe,  /* indigo-200 */
+    #f9fafb,  /* gray-50 */
+    #a5b4fc,  /* indigo-300 */
+    #e5e7eb   /* gray-200 */
+  );
+  background-size: 200% auto; /* bg-[length:200%_auto] */
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+
+  animation: wf-gradient 6s linear infinite; /* animate-[gradient_6s_linear_infinite] */
+}
+@media (min-width: 768px) { /* md:text-4xl */
+  .wf-title { font-size: 2.25rem; line-height: 2.5rem; }
+}
+
+.wf-desc {
+  font-size: 1.125rem;         /* text-lg */
+  line-height: 1.75rem;
+  color: rgba(199, 210, 254, 0.65); /* indigo-200/65 */
+}
+
+/* ====== Grid ====== */
+.wf-grid {
+  margin-left: auto;
+  margin-right: auto;
+  display: grid;
+  align-items: start;          /* items-start */
+  gap: 1.5rem;                 /* gap-6 */
+  max-width: 24rem;            /* max-w-sm */
+}
+@media (min-width: 1024px) {   /* lg:* */
+  .wf-grid {
+    max-width: none;           /* lg:max-w-none */
+    grid-template-columns: repeat(3, minmax(0, 1fr)); /* lg:grid-cols-3 */
+  }
+}
+
+/* Если Spring рендерит внутреннюю обёртку через classInner */
+.wf-gridInner {}
+
+/* ====== Card + glow (before/after) ======
+   Важно: --mouse-x / --mouse-y должны выставляться твоим JS (как и раньше). */
+.wf-card {
+  position: relative;
+  display: block;
+  height: 100%;                /* h-full */
+  overflow: hidden;
+  border-radius: 1rem;         /* rounded-2xl */
+  background-color: #1f2937;   /* bg-gray-800 */
+  padding: 1px;                /* p-px */
+  text-decoration: none;
+}
+
+.wf-card::before,
+.wf-card::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;       /* rounded-full */
+  opacity: 0;
+  filter: blur(64px);          /* blur-3xl */
+  transition: opacity 500ms;   /* transition-opacity duration-500 */
+  transform: translate(var(--mouse-x), var(--mouse-y));
+}
+
+.wf-card::before {
+  left: -10rem;                /* -left-40 */
+  top: -10rem;                 /* -top-40 */
+  z-index: 10;
+  width: 20rem;                /* w-80 */
+  height: 20rem;               /* h-80 */
+  background-color: rgba(99, 102, 241, 0.8); /* indigo-500/80 */
+}
+
+.wf-card::after {
+  left: -12rem;                /* -left-48 */
+  top: -12rem;                 /* -top-48 */
+  z-index: 30;
+  width: 16rem;                /* w-64 */
+  height: 16rem;               /* h-64 */
+  background-color: #6366f1;   /* indigo-500 */
+}
+
+/* group-hover:before:opacity-100 (как в Tailwind) */
+.wf-group:hover .wf-card::before { opacity: 1; }
+
+/* hover:after:opacity-20 */
+.wf-card:hover::after { opacity: 0.2; }
+
+/* Inner */
+.wf-cardInner {
+  position: relative;
+  z-index: 20;
+  height: 100%;
+  overflow: hidden;
+  border-radius: inherit;      /* rounded-[inherit] */
+  background-color: #030712;   /* bg-gray-950 */
+}
+
+/* after overlay gradient: after:bg-linear-to-br ... */
+.wf-cardInner::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(
+    to bottom right,
+    rgba(17, 24, 39, 0.5),     /* gray-900/50 */
+    rgba(31, 41, 55, 0.25),    /* gray-800/25 */
+    rgba(17, 24, 39, 0.5)
+  );
+  z-index: 0;
+}
+
+/* Чтобы контент был поверх overlay */
+.wf-cardInner > * { position: relative; z-index: 1; }
+
+/* Arrow */
+.wf-cardArrow {
+  position: absolute;
+  right: 1.5rem;               /* right-6 */
+  top: 1.5rem;                 /* top-6 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;                 /* w-8 */
+  height: 2rem;                /* h-8 */
+  border-radius: 9999px;
+  border: 1px solid rgba(55, 65, 81, 0.5);     /* gray-700/50 */
+  background-color: rgba(31, 41, 55, 0.65);    /* gray-800/65 */
+  color: #e5e7eb;              /* gray-200 */
+  opacity: 0;
+  transition: opacity 150ms;   /* transition-opacity */
+}
+.wf-card:hover .wf-cardArrow { opacity: 1; }
+
+/* Image */
+.wf-img { display: inline-flex; }
+
+/* Content */
+.wf-cardContent { padding: 1.5rem; } /* p-6 */
+.wf-cardBadgeWrap { margin-bottom: 0.75rem; } /* mb-3 */
+
+.wf-badge {
+  position: relative;
+  display: inline-block;
+  border-radius: 9999px;
+  background-color: rgba(31, 41, 55, 0.4); /* bg-gray-800/40 */
+  padding: 0.125rem 0.625rem;             /* py-0.5 px-2.5 */
+  font-size: 0.75rem;                      /* text-xs */
+  line-height: 1.25rem;
+  font-weight: 400;                        /* font-normal */
+}
+.wf-badge:hover { background-color: rgba(31, 41, 55, 0.6); } /* hover:bg-gray-800/60 */
+
+/* before:border-gradient trick */
+.wf-badge::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1px solid transparent;
+
+  /* before:[background:linear-gradient(...)_border-box] */
+  background: linear-gradient(
+      to bottom,
+      rgba(55, 65, 81, 0.15),  /* gray-700/.15 */
+      rgba(55, 65, 81, 0.5)    /* gray-700/.5 */
+    ) border-box;
+
+  /* before:[mask...] / mask-composite exclude */
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+}
+
+.wf-cardText {
+  color: rgba(199, 210, 254, 0.65); /* text-indigo-200/65 */
+}
